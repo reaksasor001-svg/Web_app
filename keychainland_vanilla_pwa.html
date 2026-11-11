@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KeychainStype</title>
+  
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/app-icon.svg" type="image/svg+xml">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="KeychainStype">
+  <meta name="theme-color" content="#f4395e">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+</head>
+<body class="min-w-[320px] bg-slate-100 font-sans antialiased text-slate-800 touch-manipulation">
+
+  <!-- Responsive App Shell -->
+  <div class="relative flex h-dvh min-h-[320px] w-full flex-col overflow-hidden bg-slate-50 shadow-2xl md:shadow-none">
+    
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="hidden absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 backdrop-blur text-white text-xs font-medium px-4 py-2 rounded-full shadow-lg border border-slate-700/50 flex items-center space-x-2 animate-bounce">
+      <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+      <span id="toast-text">Notification message</span>
+    </div>
+
+    <!-- APP HEADER -->
+    <header class="sticky top-0 z-30 border-b border-rose-100 bg-white/90 px-4 py-3 backdrop-blur-md md:px-8">
+      <div class="mx-auto flex w-full max-w-7xl items-center justify-between">
+      <div class="flex items-center space-x-2 cursor-pointer" onclick="switchTab('explore')">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white shadow-md shadow-rose-200">
+          <i data-lucide="key" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-1">
+            <span class="font-extrabold text-base tracking-tight bg-gradient-to-r from-rose-600 to-amber-600 bg-clip-text text-transparent">
+              KeychainStype
+            </span>
+            <span class="text-[10px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.2 rounded-full">
+              &lt;$2
+            </span>
+          </div>
+          <p class="text-[9px] text-slate-400 font-medium">All Keychains $1.49 - $1.99</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <!-- Online/Offline Indicator -->
+        <div id="network-status" class="flex items-center mr-1" title="Network status">
+          <i data-lucide="wifi" class="w-4 h-4 text-emerald-500"></i>
+        </div>
+
+        <!-- Cart Button -->
+        <button onclick="toggleCartModal(true)" class="p-2 text-slate-700 hover:bg-rose-50 rounded-full relative transition">
+          <i data-lucide="shopping-bag" class="w-5 h-5 text-rose-600"></i>
+          <span id="cart-badge" class="hidden absolute -top-0.5 -right-0.5 bg-rose-500 text-white font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+            0
+          </span>
+        </button>
+      </div>
+      </div>
+    </header>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="min-h-0 flex-1 overflow-y-auto pb-20 md:pb-6" id="main-content">
+      
+      <!-- TAB 1: EXPLORE VIEW -->
+      <section id="view-explore" class="mx-auto w-full max-w-7xl space-y-4 p-3.5 sm:p-5 md:space-y-6 md:p-8">
+        <!-- Promo Banner -->
+        <div class="bg-gradient-to-r from-rose-500 via-pink-500 to-amber-400 rounded-2xl p-4 text-white shadow-md relative overflow-hidden">
+          <div class="relative z-10 space-y-1">
+            <span class="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider backdrop-blur">
+              Enjoys yourday with cute keychains
+            </span>
+            <h2 class="text-lg font-black tracking-tight leading-tight">
+              Cute Keychains Under $2! 🔑
+            </h2>
+            <p class="text-xs text-rose-100 font-medium">
+              Connect with makers, attach photos in live seller chat & follow store pages!
+            </p>
+          </div>
+          <i data-lucide="key" class="w-24 h-24 absolute -right-4 -bottom-4 text-white/10 transform rotate-12"></i>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+          <input 
+            type="text" 
+            id="search-input" 
+            placeholder="Search acrylic, plush, cat, anime keychains..." 
+            class="w-full bg-white border border-rose-100 rounded-xl pl-9 pr-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-rose-400/20 focus:border-rose-400 shadow-sm transition"
+            oninput="handleFilterChange()"
+          />
+        </div>
+
+        <!-- Filters Section -->
+        <div class="space-y-2">
+          <!-- Price filter -->
+          <div class="flex items-center space-x-2">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Price:</span>
+            <div class="flex space-x-1.5" id="price-filters">
+              <button onclick="setFilter('price', 'All')" class="filter-btn-price bg-rose-500 text-white px-3 py-1 rounded-full text-xs font-semibold">All</button>
+              <button onclick="setFilter('price', 'Under $1')" class="filter-btn-price bg-white text-slate-600 border border-slate-200 px-3 py-1 rounded-full text-xs font-semibold">Under $1</button>
+              <button onclick="setFilter('price', 'Under $1.50')" class="filter-btn-price bg-white text-slate-600 border border-slate-200 px-3 py-1 rounded-full text-xs font-semibold">Under $1.50</button>
+            </div>
+          </div>
+
+          <!-- Material filter -->
+          <div class="flex space-x-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" id="material-filters">
+            <!-- Rendered by JS -->
+          </div>
+
+          <!-- Theme filter -->
+          <div class="flex space-x-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" id="theme-filters">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Seller Store Spotlight -->
+        <div class="space-y-2 pt-1">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Independent Keychain Sellers</h3>
+            <span class="text-[10px] font-semibold text-rose-600">3 Verified Crafters</span>
+          </div>
+          <div class="flex space-x-3 overflow-x-auto pb-1 md:grid md:grid-cols-3 md:gap-4 md:space-x-0 md:overflow-visible" id="sellers-list">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Product Catalog Grid -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Keychain Catalog</h3>
+            <span class="text-[10px] text-slate-400">Strictly Under $2.00</span>
+          </div>
+
+          <div id="product-grid" class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 md:gap-5">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: STORE VIEW -->
+      <section id="view-store" class="hidden mx-auto min-h-full w-full max-w-7xl bg-slate-50">
+        <!-- Rendered by JS when a seller store is selected -->
+      </section>
+
+      <!-- TAB 3: CHAT VIEW -->
+      <section id="view-chats" class="hidden h-full w-full max-w-5xl flex-col bg-white mx-auto md:border-x md:border-slate-200">
+        <!-- Rendered by JS -->
+      </section>
+
+      <!-- TAB 4: SAVED VIEW -->
+      <section id="view-saved" class="hidden mx-auto w-full max-w-7xl space-y-5 p-4 sm:p-5 md:p-8">
+        <!-- Rendered by JS -->
+      </section>
+
+      <!-- TAB 5: PROFILE VIEW & PWA SETTINGS -->
+      <section id="view-profile" class="hidden mx-auto w-full max-w-3xl space-y-4 p-4 sm:p-5 md:p-8">
+        <button onclick="goBack()" class="inline-flex items-center space-x-2 px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:bg-rose-50 transition" aria-label="Go back to the previous page">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Back</span>
+        </button>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 flex items-center space-x-3 shadow-sm">
+          <div id="profile-initials" class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-base">
+            KC
+          </div>
+          <div class="min-w-0">
+            <h3 id="profile-name" class="font-bold text-sm text-slate-900">Guest shopper</h3>
+            <p id="profile-email" class="text-xs text-slate-400">Create a profile to get started</p>
+            <span id="profile-badge" class="hidden mt-1 text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-semibold">
+              Keychain shopper
+            </span>
+          </div>
+        </div>
+
+        <form id="account-form" class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 shadow-sm">
+          <div>
+            <h4 id="account-form-title" class="font-bold text-sm text-slate-900">Create your account</h4>
+            <p id="account-form-description" class="text-xs text-slate-500 mt-1">Save a shopper profile on this device.</p>
+          </div>
+          <label class="block text-xs font-semibold text-slate-600" for="account-name">Your name</label>
+          <input id="account-name" name="name" type="text" autocomplete="name" maxlength="60" required
+            class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400/20 focus:border-rose-400"
+            placeholder="e.g. Keychain Fan">
+          <label class="block text-xs font-semibold text-slate-600" for="account-email">Email address</label>
+          <input id="account-email" name="email" type="email" autocomplete="email" maxlength="254" required
+            class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400/20 focus:border-rose-400"
+            placeholder="you@example.com">
+          <p class="text-[11px] text-slate-500 leading-relaxed">This prototype stores your profile only in this browser. It does not create a secure login or sync across devices.</p>
+          <button id="account-submit" type="submit" class="w-full bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold py-2.5 rounded-xl transition">
+            Create Account
+          </button>
+        </form>
+
+        <!-- PWA Status Box -->
+        <div class="bg-gradient-to-br from-slate-900 to-rose-950 text-white rounded-2xl p-4 shadow-md space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
+              <h4 class="font-bold text-sm">PWA Mobile Status</h4>
+            </div>
+            <span id="pwa-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+              PWA Ready
+            </span>
+          </div>
+
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Install KeychainStype on your device for quick access. The app and product catalog are available offline after your first online visit.
+          </p>
+
+          <button id="pwa-install-btn" onclick="triggerPWAInstall()" class="w-full bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold py-2.5 rounded-xl transition shadow-lg flex items-center justify-center space-x-2">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Install KeychainStype App</span>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- CART DRAWER MODAL -->
+    <div id="cart-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
+      <div class="bg-white w-full max-w-xs h-full flex flex-col justify-between p-4 shadow-2xl">
+        <div>
+          <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="shopping-bag" class="w-5 h-5 text-rose-600"></i>
+              <h3 class="font-bold text-sm text-slate-900">Keychain Cart</h3>
+            </div>
+            <button onclick="toggleCartModal(false)" class="text-slate-400 hover:text-slate-600">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+
+          <div id="cart-items-container" class="divide-y divide-slate-100 overflow-y-auto max-h-[60vh] py-2">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <div id="cart-summary" class="border-t border-slate-100 pt-3 space-y-3">
+          <div class="space-y-1 text-xs">
+            <div class="flex justify-between text-slate-500">
+              <span>Subtotal</span>
+              <span id="cart-subtotal">$0.00</span>
+            </div>
+            <div class="flex justify-between text-slate-500">
+              <span>Shipping</span>
+              <span class="text-emerald-600 font-bold">FREE (&lt;$2 Deal)</span>
+            </div>
+            <div class="flex justify-between font-extrabold text-slate-900 text-sm pt-1 border-t border-slate-100">
+              <span>Total</span>
+              <span id="cart-total" class="text-rose-600">$0.00</span>
+            </div>
+          </div>
+
+          <button onclick="checkoutCart()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs py-3 rounded-xl transition shadow-md flex items-center justify-center space-x-2">
+            <i data-lucide="package-check" class="w-4 h-4"></i>
+            <span>Checkout Keychain Order</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECKOUT PAYMENT MODAL -->
+    <div id="checkout-modal" class="hidden fixed inset-0 z-[55] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+      <div class="bg-white w-full max-w-sm max-h-[90vh] overflow-y-auto rounded-2xl p-5 space-y-4 shadow-2xl">
+        <div class="flex items-center justify-between">
+          <h3 id="checkout-title" class="font-bold text-base text-slate-900">Choose how to pay</h3>
+          <button type="button" onclick="closeCheckoutModal()" class="p-1 text-slate-400 hover:text-slate-600" aria-label="Close checkout">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <p class="text-xs text-slate-500">Order total: <span id="checkout-total" class="font-extrabold text-rose-600">$0.00</span></p>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button id="payment-method-qr" type="button" onclick="selectPaymentMethod('qr')" aria-pressed="true" class="border border-rose-300 bg-rose-50 rounded-xl p-3 text-left">
+            <span class="block text-xs font-bold text-slate-800">Pay now by QR</span>
+            <span class="block text-[10px] text-slate-500 mt-1">Scan before placing order</span>
+          </button>
+          <button id="payment-method-delivery" type="button" onclick="selectPaymentMethod('delivery')" aria-pressed="false" class="border border-slate-200 bg-white rounded-xl p-3 text-left">
+            <span class="block text-xs font-bold text-slate-800">Pay on delivery</span>
+            <span class="block text-[10px] text-slate-500 mt-1">Pay when your order arrives</span>
+          </button>
+        </div>
+
+        <div id="qr-payment-panel" class="text-center space-y-2">
+          <img id="payment-qr-image" src="assets/payment-qr.png" alt="Store payment QR code" class="hidden mx-auto w-48 h-48 object-contain border border-slate-200 rounded-xl">
+          <p id="payment-qr-unavailable" class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800">
+            Payment QR is not configured. Add your real QR image at <strong>assets/payment-qr.png</strong> to enable QR checkout.
+          </p>
+          <p id="payment-qr-instructions" class="hidden text-xs text-slate-600">Scan the code and pay the exact total shown above. This prototype cannot verify payment automatically.</p>
+        </div>
+
+        <div id="delivery-payment-panel" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs text-emerald-800">
+          Place the order now and pay the total when it is delivered.
+        </div>
+
+        <button id="confirm-checkout-button" type="button" onclick="confirmCheckout()" class="w-full bg-rose-500 hover:bg-rose-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs py-3 rounded-xl transition">
+          Add payment QR to enable
+        </button>
+        <p class="text-[10px] text-slate-400 text-center">Prototype checkout stores orders only in this browser.</p>
+      </div>
+    </div>
+
+    <!-- PRODUCT DETAIL POPUP MODAL -->
+    <div id="product-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center">
+      <div id="product-modal-content" class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[85vh] overflow-y-auto p-4 space-y-4">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </div>
+
+    <div id="account-required-modal" class="hidden fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="account-required-title">
+      <div class="bg-white w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="user-round" class="w-5 h-5 text-rose-500"></i>
+            <h3 id="account-required-title" class="font-bold text-base text-slate-900">Account required</h3>
+          </div>
+          <button type="button" onclick="closeAccountRequiredModal()" class="p-1 text-slate-400 hover:text-slate-600" aria-label="Close account required message">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <p class="text-sm text-slate-600 leading-relaxed">Create your shopper account before adding items to your cart or placing an order. You can continue shopping without an account, but you won't be able to buy.</p>
+        <p class="text-xs text-slate-500">This prototype saves your profile only in this browser; it does not provide secure sign-in or account syncing.</p>
+        <div class="flex space-x-2">
+          <button type="button" onclick="closeAccountRequiredModal()" class="flex-1 border border-slate-200 text-slate-600 font-semibold text-xs py-3 rounded-xl hover:bg-slate-50">
+            Not now
+          </button>
+          <button type="button" onclick="continueToAccount()" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs py-3 rounded-xl">
+            Create account
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="absolute bottom-0 left-0 right-0 z-30 flex items-center justify-around border-t border-slate-200 bg-white px-1 py-2 shadow-lg md:static md:justify-center md:gap-10 md:py-3 md:shadow-none">
+      <button onclick="switchTab('explore')" id="nav-explore" class="nav-btn flex flex-col items-center space-y-1 px-3 py-1 rounded-xl text-rose-600 font-bold">
+        <i data-lucide="key" class="w-5 h-5"></i>
+        <span class="text-[10px]">Keychains</span>
+      </button>
+
+      <button onclick="switchTab('store')" id="nav-store" class="nav-btn flex flex-col items-center space-y-1 px-3 py-1 rounded-xl text-slate-400">
+        <i data-lucide="store" class="w-5 h-5"></i>
+        <span class="text-[10px]">Makers</span>
+      </button>
+
+      <button onclick="switchTab('chats')" id="nav-chats" class="nav-btn flex flex-col items-center space-y-1 px-3 py-1 rounded-xl text-slate-400 relative">
+        <i data-lucide="message-square" class="w-5 h-5"></i>
+        <span class="text-[10px]">Chats</span>
+        <span id="chat-unread-dot" class="hidden absolute top-1 right-3 w-2 h-2 bg-rose-500 rounded-full"></span>
+      </button>
+
+      <button onclick="switchTab('saved')" id="nav-saved" class="nav-btn flex flex-col items-center space-y-1 px-3 py-1 rounded-xl text-slate-400">
+        <i data-lucide="heart" class="w-5 h-5"></i>
+        <span class="text-[10px]">Saved</span>
+      </button>
+
+      <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn flex flex-col items-center space-y-1 px-3 py-1 rounded-xl text-slate-400">
+        <i data-lucide="user" class="w-5 h-5"></i>
+        <span class="text-[10px]">Profile</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- VANILLA JAVASCRIPT APP LOGIC -->
+  <script>
+    // --- APP DATA STATE ---
+    const SELLERS = [
+      {
+        id: 's1',
+        name: 'ChibiCharm Lab',
+        handle: '@chibicharms',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+        banner: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
+        bio: 'Handmade-style anime, music, and beaded keychains in cute and gothic styles, all under $2!',
+        rating: 4.9,
+        reviewsCount: 482,
+        followersCount: 3120,
+        likesCount: 9420,
+        isVerified: true
+      },
+      {
+        id: 's2',
+        name: 'PlushiePals Crafts',
+        handle: '@plushiepals',
+        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
+        banner: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&auto=format&fit=crop&q=80',
+        bio: 'Colorful character, animal, and beaded keychains for backpacks, bags, and keys, all under $2.',
+        rating: 4.8,
+        reviewsCount: 310,
+        followersCount: 1950,
+        likesCount: 5210,
+        isVerified: true
+      },
+      {
+        id: 's3',
+        name: 'RetroKey Pixel Studio',
+        handle: '@retrokey',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+        banner: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=80',
+        bio: 'Creative travel, music, character, and collectible keychains at budget-friendly prices.',
+        rating: 5.0,
+        reviewsCount: 175,
+        followersCount: 1240,
+        likesCount: 3880,
+        isVerified: false
+      }
+    ];
+
+    const PRODUCTS = [
+      {
+        id: 'k1',
+        sellerId: 's1',
+        title: 'Beaded Anime Figure & Photo Charm',
+        price: 1.99,
+        material: 'Beaded',
+        theme: 'Anime',
+        badge: 'Under $2',
+        image: 'assets/keychains/anime-bead-figure.png',
+        description: 'A character figure charm paired with black beads and a matching photo strip.'
+      },
+      {
+        id: 'k2',
+        sellerId: 's1',
+        title: 'Anime Photo Shaker & Heart Bead Charm',
+        price: 1.79,
+        material: 'Mixed',
+        theme: 'Photo Charms',
+        badge: 'Under $2',
+        image: 'assets/keychains/anime-photo-shaker.png',
+        description: 'A round character photo charm decorated with pink heart beads and silver accents.'
+      },
+      {
+        id: 'k3',
+        sellerId: 's2',
+        title: 'Star-Top Anime Panel Keychain Pair',
+        price: 1.99,
+        material: 'Mixed',
+        theme: 'Photo Charms',
+        badge: 'Popular',
+        image: 'assets/keychains/anime-panel-charms.png',
+        description: 'Two character panel charms decorated with star, letter, and flower beads.'
+      },
+      {
+        id: 'k4',
+        sellerId: 's2',
+        title: 'Pink & Teal Anime Beaded Charm Pair',
+        price: 1.89,
+        material: 'Beaded',
+        theme: 'Beaded',
+        badge: 'Under $2',
+        image: 'assets/keychains/anime-pink-teal-charms.png',
+        description: 'Matching character photo charms with colorful beads, hearts, and star clasps.'
+      },
+      {
+        id: 'k5',
+        sellerId: 's3',
+        title: 'Anime ID Holder & Character Figure Charm',
+        price: 1.99,
+        material: 'Acrylic',
+        theme: 'Anime',
+        badge: 'Under $2',
+        image: 'assets/keychains/anime-id-figure.png',
+        description: 'A character ID holder paired with matching acrylic character artwork and a figure.'
+      },
+      {
+        id: 'k6',
+        sellerId: 's1',
+        title: 'Silver Heart Compact Keychain',
+        price: 1.69,
+        material: 'Metal',
+        theme: 'Gothic',
+        badge: 'Under $2',
+        image: 'assets/keychains/silver-heart-charm.png',
+        description: 'A dark heart-shaped compact charm with polished silver hardware and ribbon detail.'
+      },
+      {
+        id: 'k7',
+        sellerId: 's2',
+        title: 'Strawberry & Headphone Beaded Keychain',
+        price: 1.59,
+        material: 'Beaded',
+        theme: 'Beaded',
+        badge: 'Popular',
+        image: 'assets/keychains/strawberry-headphone-beads.png',
+        description: 'A playful layered charm with a strawberry, headphones, and black-and-white beads.'
+      },
+      {
+        id: 'k8',
+        sellerId: 's3',
+        title: 'Silver Electric Guitar Keychain Pair',
+        price: 1.89,
+        material: 'Metal',
+        theme: 'Music',
+        badge: 'Under $2',
+        image: 'assets/keychains/guitar-pair-charms.png',
+        description: 'A matching pair of silver-tone guitar charms with heart clasps and star pendants.'
+      },
+      {
+        id: 'k9',
+        sellerId: 's3',
+        title: 'Mini Passport & Suitcase Travel Charm',
+        price: 1.79,
+        material: 'Acrylic',
+        theme: 'Photo Charms',
+        badge: 'Under $2',
+        image: 'assets/keychains/travel-charms.png',
+        description: 'A tiny travel-themed charm set with miniature passport, suitcase, and globe details.'
+      },
+      {
+        id: 'k10',
+        sellerId: 's2',
+        title: 'Black & White Dragon Duo Charm',
+        price: 1.89,
+        material: 'Mixed',
+        theme: 'Anime',
+        badge: 'Popular',
+        image: 'assets/keychains/dragon-keychains.png',
+        description: 'A pair of contrasting dragon character charms with wrist straps.'
+      },
+      {
+        id: 'k11',
+        sellerId: 's1',
+        title: 'Electric Guitar & Star Charm',
+        price: 1.59,
+        material: 'Metal',
+        theme: 'Music',
+        badge: 'Under $2',
+        image: 'assets/keychains/guitar-keychains.png',
+        description: 'A miniature guitar charm paired with silver-tone star details.'
+      },
+      {
+        id: 'k12',
+        sellerId: 's3',
+        title: 'Pastel Cat Photo Shaker Charm',
+        price: 1.49,
+        material: 'Mixed',
+        theme: 'Photo Charms',
+        badge: 'Under $2',
+        image: 'assets/keychains/cat-charm.png',
+        description: 'A pastel pink cat charm with a glittery photo frame and decorative details.'
+      },
+      {
+        id: 'k13',
+        sellerId: 's2',
+        title: 'Anime Character Acrylic Charm Set',
+        price: 1.99,
+        material: 'Acrylic',
+        theme: 'Anime',
+        badge: 'Under $2',
+        image: 'assets/keychains/anime-character-keychains.png',
+        description: 'A colorful assortment of character-shaped acrylic keychain charms.'
+      },
+      {
+        id: 'k14',
+        sellerId: 's1',
+        title: 'Anime Character ID Holder Charm',
+        price: 1.89,
+        material: 'Acrylic',
+        theme: 'Anime',
+        badge: 'Popular',
+        image: 'assets/keychains/anime-id-keychain.png',
+        description: 'A character ID holder keychain with a matching illustrated character charm.'
+      },
+      {
+        id: 'k15',
+        sellerId: 's3',
+        title: 'Bear Figure Collectible Keychain',
+        price: 1.69,
+        material: 'Mixed',
+        theme: 'Anime',
+        badge: 'Under $2',
+        image: 'assets/keychains/bear-figure-keychain.png',
+        description: 'A detailed bear figure charm with coordinating decorative accents.'
+      },
+      {
+        id: 'k16',
+        sellerId: 's2',
+        title: 'Anime Panel & Character Charm Pair',
+        price: 1.99,
+        material: 'Acrylic',
+        theme: 'Photo Charms',
+        badge: 'Under $2',
+        image: 'assets/keychains/anime-panel-keychains.png',
+        description: 'Character artwork displayed in clear rectangular panel keychains.'
+      },
+      {
+        id: 'k17',
+        sellerId: 's1',
+        title: 'Mini Violin & Bow Charm',
+        price: 1.49,
+        material: 'Metal',
+        theme: 'Music',
+        badge: 'Under $2',
+        image: 'assets/keychains/violin-keychain.png',
+        description: 'A miniature violin and bow charm with a black ribbon and metal key ring.'
+      }
+    ];
+
+    const APP_STATE_KEY = 'keychainland-app-state-v1';
+    let storageWarningShown = false;
+
+    function loadAppState() {
+      try {
+        const saved = window.localStorage.getItem(APP_STATE_KEY);
+        if (!saved) return {};
+        const parsed = JSON.parse(saved);
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+          console.error('Saved app data has an invalid format.');
+          return {};
+        }
+        return parsed;
+      } catch (error) {
+        console.error('Unable to load saved app data.', error);
+        return {};
+      }
+    }
+
+    function saveAppState() {
+      try {
+        window.localStorage.setItem(APP_STATE_KEY, JSON.stringify({
+          cart: cart.map(item => ({ productId: item.product.id, quantity: item.quantity })),
+          likedProducts,
+          followedSellers,
+          likedSellers,
+          sellerLikesCount,
+          profile: accountProfile
+        }));
+        return true;
+      } catch (error) {
+        console.error('Unable to save app data.', error);
+        if (!storageWarningShown) {
+          storageWarningShown = true;
+          showToast('Could not save your changes on this device.');
+        }
+        return false;
+      }
+    }
+
+    const savedAppState = loadAppState();
+    let accountProfile = savedAppState.profile
+      && typeof savedAppState.profile.name === 'string'
+      && typeof savedAppState.profile.email === 'string'
+      ? {
+          name: savedAppState.profile.name.trim().slice(0, 60),
+          email: savedAppState.profile.email.trim().slice(0, 254)
+        }
+      : null;
+
+    function restoreIds(savedIds, validIds, defaults) {
+      if (!Array.isArray(savedIds)) return defaults;
+      return [...new Set(savedIds.filter(id => typeof id === 'string' && validIds.includes(id)))];
+    }
+
+    // State Variables
+    let currentTab = 'explore';
+    let selectedSellerId = 's1';
+    let activeChatSellerId = null;
+    let tabHistory = ['explore'];
+    let tabHistoryIndex = 0;
+    let priceFilter = 'All';
+    let selectedMaterial = 'All';
+    let selectedTheme = 'All';
+    let deferredPwaPrompt = null;
+    let pendingChatImage = null;
+    let pendingCartProductId = null;
+    let selectedPaymentMethod = 'qr';
+    let paymentQrAvailable = false;
+
+    let cart = Array.isArray(savedAppState.cart)
+      ? savedAppState.cart.reduce((items, savedItem) => {
+          if (!savedItem || typeof savedItem.productId !== 'string' || !Number.isInteger(savedItem.quantity) || savedItem.quantity < 1) return items;
+          const product = PRODUCTS.find(item => item.id === savedItem.productId);
+          if (product) items.push({ product, quantity: savedItem.quantity });
+          return items;
+        }, [])
+      : [
+          { product: PRODUCTS[0], quantity: 2 },
+          { product: PRODUCTS[3], quantity: 1 }
+        ];
+
+    let likedProducts = restoreIds(savedAppState.likedProducts, PRODUCTS.map(product => product.id), ['k1', 'k3']);
+    let followedSellers = restoreIds(savedAppState.followedSellers, SELLERS.map(seller => seller.id), ['s1']);
+    let likedSellers = restoreIds(savedAppState.likedSellers, SELLERS.map(seller => seller.id), ['s1']);
+    let sellerLikesCount = { s1: 9420, s2: 5210, s3: 3880 };
+    if (savedAppState.sellerLikesCount && typeof savedAppState.sellerLikesCount === 'object') {
+      SELLERS.forEach(seller => {
+        const count = savedAppState.sellerLikesCount[seller.id];
+        if (Number.isInteger(count) && count >= 0) sellerLikesCount[seller.id] = count;
+      });
+    }
+
+    let chats = [
+      {
+        sellerId: 's1',
+        messages: [
+          { id: 'm1', sender: 'seller', text: 'Hi! Welcome to ChibiCharm Lab! All our custom keychains are under $2. Feel free to send a picture of your design!', time: '10:15 AM' }
+        ]
+      },
+      {
+        sellerId: 's2',
+        messages: [
+          { id: 'm1', sender: 'seller', text: 'Hey there! We just restocked plush bear keychains at $1.49 each!', time: 'Yesterday' }
+        ]
+      }
+    ];
+
+    // --- INITIALIZATION ---
+    window.addEventListener('load', () => {
+      window.history.replaceState({ keychainTab: currentTab, keychainIndex: tabHistoryIndex }, '');
+      window.addEventListener('popstate', (event) => {
+        const state = event.state;
+        const validTabs = ['explore', 'store', 'chats', 'saved', 'profile'];
+        const tabName = state && validTabs.includes(state.keychainTab) ? state.keychainTab : 'explore';
+        tabHistoryIndex = state && Number.isInteger(state.keychainIndex) ? state.keychainIndex : 0;
+        tabHistory = tabHistory.slice(0, tabHistoryIndex + 1);
+        if (tabHistory[tabHistoryIndex] !== tabName) tabHistory[tabHistoryIndex] = tabName;
+        switchTab(tabName, false);
+      });
+
+      lucide.createIcons();
+      const paymentQrImage = document.getElementById('payment-qr-image');
+      paymentQrImage.addEventListener('load', () => handlePaymentQrLoad(true));
+      paymentQrImage.addEventListener('error', () => handlePaymentQrLoad(false));
+      if (paymentQrImage.complete) handlePaymentQrLoad(paymentQrImage.naturalWidth > 0);
+      renderMaterialFilters();
+      renderThemeFilters();
+      renderSellersList();
+      renderProductsGrid();
+      updateCartUI();
+      renderProfile();
+
+      document.getElementById('account-form').addEventListener('submit', event => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        if (!form.reportValidity()) return;
+
+        const name = document.getElementById('account-name').value.trim();
+        const email = document.getElementById('account-email').value.trim();
+        if (!name || !email) {
+          showToast('Please enter your name and email address.');
+          return;
+        }
+
+        const previousProfile = accountProfile;
+        accountProfile = { name, email };
+        if (!saveAppState()) {
+          accountProfile = previousProfile;
+          renderProfile();
+          return;
+        }
+
+        renderProfile();
+        if (pendingCartProductId) {
+          const productId = pendingCartProductId;
+          pendingCartProductId = null;
+          addToCart(productId);
+          showToast('Profile saved. Your item was added to the cart.');
+        } else {
+          showToast('Your profile was saved on this device.');
+        }
+      });
+
+      // Network Listeners
+      window.addEventListener('online', updateNetworkStatus);
+      window.addEventListener('offline', updateNetworkStatus);
+      updateNetworkStatus();
+
+      // PWA Install Event Listener
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPwaPrompt = e;
+        document.querySelector('#pwa-install-btn span').textContent = 'Install KeychainStype';
+      });
+      window.addEventListener('appinstalled', () => {
+        deferredPwaPrompt = null;
+        showToast('KeychainStype was installed successfully.');
+      });
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(error => {
+          console.error('Service worker registration failed.', error);
+          showToast('Offline app features could not be enabled.');
+        });
+      }
+    });
+
+    // --- UTILS ---
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-text').innerText = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+
+    function renderProfile() {
+      const nameInput = document.getElementById('account-name');
+      const emailInput = document.getElementById('account-email');
+      document.getElementById('profile-name').textContent = accountProfile ? accountProfile.name : 'Guest shopper';
+      document.getElementById('profile-email').textContent = accountProfile ? accountProfile.email : 'Create a profile to get started';
+      document.getElementById('profile-initials').textContent = accountProfile
+        ? accountProfile.name.split(/\s+/).map(part => part[0]).join('').slice(0, 2).toUpperCase()
+        : 'KC';
+      document.getElementById('profile-badge').classList.toggle('hidden', !accountProfile);
+      document.getElementById('account-form-title').textContent = accountProfile ? 'Update your profile' : 'Create your account';
+      document.getElementById('account-form-description').textContent = accountProfile
+        ? 'Your shopper profile is saved on this device.'
+        : 'Save a shopper profile on this device.';
+      document.getElementById('account-submit').textContent = accountProfile ? 'Save Changes' : 'Create Account';
+      nameInput.value = accountProfile ? accountProfile.name : '';
+      emailInput.value = accountProfile ? accountProfile.email : '';
+    }
+
+    function updateNetworkStatus() {
+      const statusEl = document.getElementById('network-status');
+      if (navigator.onLine) {
+        statusEl.innerHTML = `<i data-lucide="wifi" class="w-4 h-4 text-emerald-500"></i>`;
+      } else {
+        statusEl.innerHTML = `<i data-lucide="wifi-off" class="w-4 h-4 text-rose-500 animate-pulse"></i>`;
+      }
+      lucide.createIcons();
+    }
+
+    // --- NAVIGATION LOGIC ---
+    function switchTab(tabName, recordHistory = true) {
+      if (recordHistory && tabName !== currentTab) {
+        tabHistory = tabHistory.slice(0, tabHistoryIndex + 1);
+        tabHistory.push(tabName);
+        tabHistoryIndex += 1;
+        window.history.pushState({ keychainTab: tabName, keychainIndex: tabHistoryIndex }, '');
+      }
+
+      currentTab = tabName;
+
+      // Hide all tabs
+      ['explore', 'store', 'chats', 'saved', 'profile'].forEach(t => {
+        document.getElementById(`view-${t}`).classList.add('hidden');
+        document.getElementById(`nav-${t}`).className = "nav-btn flex flex-col items-center space-y-1 px-3 py-1 rounded-xl text-slate-400";
+      });
+
+      // Show active tab
+      document.getElementById(`view-${tabName}`).classList.remove('hidden');
+      document.getElementById(`nav-${tabName}`).className = "nav-btn flex flex-col items-center space-y-1 px-3 py-1 rounded-xl text-rose-600 font-bold";
+
+      if (tabName === 'store') renderStoreView();
+      if (tabName === 'chats') renderChatsView();
+      if (tabName === 'saved') renderSavedView();
+      
+      lucide.createIcons();
+    }
+
+    function goBack() {
+      if (tabHistoryIndex > 0) {
+        window.history.back();
+      } else if (currentTab !== 'explore') {
+        switchTab('explore', false);
+      }
+    }
+
+    function openSellerStore(sellerId) {
+      selectedSellerId = sellerId;
+      switchTab('store');
+    }
+
+    // --- EXPLORE TAB RENDERERS & FILTERS ---
+    function renderMaterialFilters() {
+      const materials = ['All', 'Acrylic', 'Beaded', 'Mixed', 'Metal'];
+      const container = document.getElementById('material-filters');
+      container.innerHTML = `<span class="text-xs font-bold text-slate-400 self-center mr-1">Material:</span>` + 
+        materials.map(m => `
+          <button onclick="setFilter('material', '${m}')" class="mat-btn ${selectedMaterial === m ? 'bg-slate-800 text-white' : 'bg-white text-slate-600 border border-slate-200'} px-2.5 py-1 rounded-lg text-xs whitespace-nowrap font-medium transition">
+            ${m}
+          </button>
+        `).join('');
+    }
+
+    function renderThemeFilters() {
+      const themes = ['All', 'Anime', 'Beaded', 'Gothic', 'Music', 'Photo Charms'];
+      const container = document.getElementById('theme-filters');
+      container.innerHTML = `<span class="text-xs font-bold text-slate-400 self-center mr-1">Style:</span>` + 
+        themes.map(t => `
+          <button onclick="setFilter('theme', '${t}')" class="theme-btn ${selectedTheme === t ? 'bg-amber-500 text-white' : 'bg-white text-slate-600 border border-slate-200'} px-2.5 py-1 rounded-lg text-xs whitespace-nowrap font-medium transition">
+            ${t}
+          </button>
+        `).join('');
+    }
+
+    function setFilter(type, val) {
+      if (type === 'price') priceFilter = val;
+      if (type === 'material') selectedMaterial = val;
+      if (type === 'theme') selectedTheme = val;
+      
+      renderMaterialFilters();
+      renderThemeFilters();
+      renderProductsGrid();
+    }
+
+    function handleFilterChange() {
+      renderProductsGrid();
+    }
+
+    function renderSellersList() {
+      const container = document.getElementById('sellers-list');
+      container.innerHTML = SELLERS.map(s => `
+        <div onclick="openSellerStore('${s.id}')" class="flex-shrink-0 w-28 rounded-2xl border border-rose-100 bg-white p-2.5 text-center cursor-pointer transition group hover:shadow-md md:w-auto md:p-4">
+          <img src="${s.avatar}" alt="${s.name}" class="w-12 h-12 rounded-full object-cover mx-auto ring-2 ring-rose-100 shadow-sm mb-1.5" />
+          <p class="font-bold text-xs text-slate-800 truncate group-hover:text-rose-600">${s.name}</p>
+          <div class="flex items-center justify-center text-[10px] text-amber-500 mt-0.5">
+            <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400 mr-0.5"></i>
+            <span>${s.rating}</span>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function renderProductsGrid() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const grid = document.getElementById('product-grid');
+
+      const filtered = PRODUCTS.filter(p => {
+        const matchesSearch = p.title.toLowerCase().includes(search) || p.material.toLowerCase().includes(search);
+        let matchesPrice = true;
+        if (priceFilter === 'Under $1') matchesPrice = p.price < 1.00;
+        if (priceFilter === 'Under $1.50') matchesPrice = p.price <= 1.50;
+
+        const matchesMaterial = selectedMaterial === 'All' || p.material === selectedMaterial;
+        const matchesTheme = selectedTheme === 'All' || p.theme === selectedTheme;
+
+        return matchesSearch && matchesPrice && matchesMaterial && matchesTheme;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-10 bg-white rounded-2xl border border-dashed border-slate-200">
+            <p class="text-xs text-slate-400">No keychains under $2 matched your query.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => {
+        const isLiked = likedProducts.includes(p.id);
+        return `
+          <div onclick="openProductModal('${p.id}')" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col cursor-pointer group">
+            <div class="relative aspect-square bg-slate-100 overflow-hidden">
+              <img src="${p.image}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+              <span class="absolute top-2 left-2 bg-rose-500 text-white font-bold text-[9px] px-2 py-0.5 rounded-full shadow-sm">
+                $${p.price.toFixed(2)}
+              </span>
+              <button onclick="toggleProductLike('${p.id}', event)" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/80 backdrop-blur flex items-center justify-center text-slate-600 hover:text-rose-500 transition shadow-sm">
+                <i data-lucide="heart" class="w-3.5 h-3.5 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}"></i>
+              </button>
+            </div>
+            <div class="p-2.5 flex-1 flex flex-col justify-between">
+              <div>
+                <span class="text-[9px] text-slate-400 font-semibold">${p.material} • ${p.theme}</span>
+                <h4 class="font-semibold text-xs leading-snug text-slate-800 line-clamp-2 sm:text-sm">${p.title}</h4>
+              </div>
+              <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
+                <span class="font-extrabold text-sm text-rose-600">$${p.price.toFixed(2)}</span>
+                <button onclick="addToCart('${p.id}', event)" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white rounded-lg transition">
+                  <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // --- STORE VIEW RENDERER ---
+    function renderStoreView() {
+      const seller = SELLERS.find(s => s.id === selectedSellerId) || SELLERS[0];
+      const sellerProds = PRODUCTS.filter(p => p.sellerId === seller.id);
+      const isFollowed = followedSellers.includes(seller.id);
+      const isLiked = likedSellers.includes(seller.id);
+      const storeSection = document.getElementById('view-store');
+
+      storeSection.innerHTML = `
+        <div class="relative h-32 bg-slate-200 md:h-48">
+          <img src="${seller.banner}" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+          <button onclick="goBack()" class="absolute top-2 left-2 z-10 inline-flex items-center space-x-1.5 px-3 py-2 bg-white/95 rounded-xl text-xs font-semibold text-slate-700 shadow-md hover:bg-white transition" aria-label="Go back to the previous page">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            <span>Back</span>
+          </button>
+        </div>
+
+        <div class="px-4 relative -mt-8 mb-4">
+          <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <div class="flex justify-between items-start">
+              <img src="${seller.avatar}" class="w-16 h-16 rounded-2xl object-cover ring-4 ring-white shadow-md -mt-10 bg-white" />
+              <div class="flex space-x-2">
+                <button onclick="toggleFollowSeller('${seller.id}')" class="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1 ${isFollowed ? 'bg-slate-100 text-slate-700' : 'bg-rose-500 text-white'}">
+                  <i data-lucide="${isFollowed ? 'user-check' : 'user-plus'}" class="w-3.5 h-3.5"></i>
+                  <span>${isFollowed ? 'Following' : 'Follow'}</span>
+                </button>
+                <button onclick="toggleLikeSeller('${seller.id}')" class="px-3 py-1.5 rounded-xl text-xs font-semibold border ${isLiked ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-white text-slate-600'} flex items-center space-x-1">
+                  <i data-lucide="thumbs-up" class="w-3.5 h-3.5 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}"></i>
+                  <span>${sellerLikesCount[seller.id]}</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-2">
+              <h2 class="font-bold text-base text-slate-900">${seller.name}</h2>
+              <p class="text-xs text-slate-400 font-medium">${seller.handle}</p>
+              <p class="text-xs text-slate-600 mt-2">${seller.bio}</p>
+              
+              <button onclick="openChatWithSeller('${seller.id}')" class="w-full mt-3 bg-rose-50 text-rose-600 hover:bg-rose-100 font-semibold text-xs py-2 rounded-xl flex items-center justify-center space-x-2">
+                <i data-lucide="message-square" class="w-4 h-4"></i>
+                <span>Send Picture or Message to Crafter</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mx-auto max-w-7xl space-y-3 px-4 pb-6 md:px-8">
+          <h3 class="font-bold text-xs uppercase tracking-wider text-slate-400">Keychains by ${seller.name}</h3>
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 md:gap-5">
+            ${sellerProds.map(p => `
+              <div onclick="openProductModal('${p.id}')" class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm cursor-pointer">
+                <img src="${p.image}" class="w-full h-28 object-cover" />
+                <div class="p-2.5">
+                  <h4 class="font-semibold text-xs text-slate-800 truncate">${p.title}</h4>
+                  <p class="font-extrabold text-xs text-rose-600 mt-1">$${p.price.toFixed(2)}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      lucide.createIcons();
+    }
+
+    // --- CHATS VIEW & IMAGE ATTACHMENT ---
+    function openChatWithSeller(sellerId) {
+      if (!chats.some(c => c.sellerId === sellerId)) {
+        chats.push({ sellerId, messages: [] });
+      }
+      activeChatSellerId = sellerId;
+      switchTab('chats');
+    }
+
+    function renderChatsView() {
+      const container = document.getElementById('view-chats');
+
+      if (activeChatSellerId) {
+        const seller = SELLERS.find(s => s.id === activeChatSellerId);
+        const chatData = chats.find(c => c.sellerId === activeChatSellerId);
+
+        container.innerHTML = `
+          <div class="px-4 py-3 bg-rose-50/50 border-b border-rose-100 flex items-center space-x-3">
+            <button onclick="activeChatSellerId = null; renderChatsView();" class="p-1 text-slate-600 hover:bg-rose-100 rounded-lg">
+              <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </button>
+            <img src="${seller.avatar}" class="w-8 h-8 rounded-full object-cover ring-2 ring-rose-200" />
+            <div>
+              <h4 class="font-bold text-xs text-slate-900">${seller.name}</h4>
+              <p class="text-[10px] text-emerald-600 font-medium">Online • Keychain Customizer</p>
+            </div>
+          </div>
+
+          <div id="chat-messages-box" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50">
+            ${chatData.messages.map(m => `
+              <div class="flex flex-col ${m.sender === 'user' ? 'items-end' : 'items-start'}">
+                <div class="max-w-[82%] rounded-2xl px-3.5 py-2.5 text-xs shadow-sm ${m.sender === 'user' ? 'bg-rose-500 text-white rounded-br-none' : 'bg-white text-slate-800 border border-slate-200 rounded-bl-none'}">
+                  ${m.image ? `<img src="${m.image}" class="w-full max-h-48 object-cover rounded-xl mb-2 border border-black/10 shadow-inner" />` : ''}
+                  ${m.text ? `<p>${m.text}</p>` : ''}
+                </div>
+                <span class="text-[9px] text-slate-400 mt-1 px-1">${m.time}</span>
+              </div>
+            `).join('')}
+          </div>
+
+          ${pendingChatImage ? `
+            <div class="px-4 py-2 bg-rose-50 border-t border-rose-100 flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <img src="${pendingChatImage}" class="w-10 h-10 object-cover rounded-lg border border-rose-200" />
+                <span class="text-xs text-rose-700 font-semibold">Picture Attached</span>
+              </div>
+              <button onclick="pendingChatImage = null; renderChatsView();" class="p-1 text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+          ` : ''}
+
+          <div class="p-3 bg-white border-t border-slate-200 flex items-center space-x-2">
+            <input type="file" id="chat-file-input" accept="image/*" class="hidden" onchange="handleImageAttach(event)" />
+            <button onclick="document.getElementById('chat-file-input').click()" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl">
+              <i data-lucide="image" class="w-5 h-5"></i>
+            </button>
+            <input type="text" id="chat-text-input" placeholder="Ask seller or send photo..." class="flex-1 bg-slate-100 border-none rounded-xl px-3.5 py-2 text-xs focus:outline-none" onkeydown="if(event.key==='Enter') sendChatMessage()" />
+            <button onclick="sendChatMessage()" class="p-2.5 bg-rose-500 text-white rounded-xl shadow-sm">
+              <i data-lucide="send" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `;
+
+        const box = document.getElementById('chat-messages-box');
+        if (box) box.scrollTop = box.scrollHeight;
+      } else {
+        container.innerHTML = `
+          <div class="p-4 space-y-3">
+            <h2 class="font-bold text-base text-slate-900">Keychain Seller Chats</h2>
+            <div class="divide-y divide-slate-100">
+              ${chats.map(c => {
+                const seller = SELLERS.find(s => s.id === c.sellerId);
+                const lastMsg = c.messages[c.messages.length - 1];
+                return `
+                  <div onclick="openChatWithSeller('${seller.id}')" class="py-3 flex items-center justify-between cursor-pointer hover:bg-slate-50 px-2 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                      <img src="${seller.avatar}" class="w-12 h-12 rounded-full object-cover ring-2 ring-rose-100" />
+                      <div>
+                        <h4 class="font-bold text-xs text-slate-900">${seller.name}</h4>
+                        <p class="text-xs text-slate-500 line-clamp-1 mt-0.5">${lastMsg ? (lastMsg.image ? '🖼️ [Photo Attached]' : lastMsg.text) : 'Start chat...'}</p>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      lucide.createIcons();
+    }
+
+    function handleImageAttach(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          pendingChatImage = reader.result;
+          renderChatsView();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chat-text-input');
+      const text = input ? input.value.trim() : '';
+      if (!text && !pendingChatImage) return;
+
+      const chatData = chats.find(c => c.sellerId === activeChatSellerId);
+      chatData.messages.push({
+        id: 'm_' + Date.now(),
+        sender: 'user',
+        text: text,
+        image: pendingChatImage,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+
+      pendingChatImage = null;
+      renderChatsView();
+
+      // Simulated Crafter Auto-reply
+      setTimeout(() => {
+        chatData.messages.push({
+          id: 'rep_' + Date.now(),
+          sender: 'seller',
+          text: 'Got your picture! We can custom craft this keychain style for $1.49. I will send you a preview draft soon!',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+        if (currentTab === 'chats' && activeChatSellerId) {
+          renderChatsView();
+        }
+      }, 1200);
+    }
+
+    // --- SAVED VIEW RENDERER ---
+    function renderSavedView() {
+      const container = document.getElementById('view-saved');
+      container.innerHTML = `
+        <div>
+          <h2 class="font-bold text-base text-slate-900 mb-2">Saved Keychains (${likedProducts.length})</h2>
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 md:gap-5">
+            ${likedProducts.map(id => {
+              const p = PRODUCTS.find(prod => prod.id === id);
+              if (!p) return '';
+              return `
+                <div onclick="openProductModal('${p.id}')" class="bg-white border border-slate-200 rounded-xl overflow-hidden p-2 flex flex-col justify-between cursor-pointer">
+                  <img src="${p.image}" class="w-full h-24 object-cover rounded-lg" />
+                  <h4 class="font-semibold text-xs text-slate-800 truncate mt-2">${p.title}</h4>
+                  <div class="flex items-center justify-between mt-1">
+                    <span class="font-extrabold text-xs text-rose-600">$${p.price.toFixed(2)}</span>
+                    <button onclick="addToCart('${p.id}', event)" class="p-1 bg-rose-50 text-rose-600 rounded text-[10px] font-bold">+ Cart</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    // --- CART & MODALS ---
+    function addToCart(prodId, e) {
+      if (e) e.stopPropagation();
+      const product = PRODUCTS.find(p => p.id === prodId);
+      if (!product) {
+        console.error(`Cannot add unknown product "${prodId}" to the cart.`);
+        showToast('That item could not be added to your cart.');
+        return;
+      }
+      if (!accountProfile) {
+        pendingCartProductId = prodId;
+        showAccountRequiredModal();
+        return;
+      }
+      const existing = cart.find(item => item.product.id === prodId);
+      if (existing) {
+        existing.quantity++;
+      } else {
+        cart.push({ product, quantity: 1 });
+      }
+      updateCartUI();
+      showToast(`Added "${product.title}" ($${product.price.toFixed(2)}) to Cart!`);
+    }
+
+    function updateCartUI() {
+      saveAppState();
+      const badge = document.getElementById('cart-badge');
+      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+      if (totalItems > 0) {
+        badge.innerText = totalItems;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+
+      // Render cart items
+      const container = document.getElementById('cart-items-container');
+      const subtotalEl = document.getElementById('cart-subtotal');
+      const totalEl = document.getElementById('cart-total');
+
+      if (cart.length === 0) {
+        container.innerHTML = `<p class="text-center py-10 text-xs text-slate-400">Your cart is empty.</p>`;
+        subtotalEl.innerText = '$0.00';
+        totalEl.innerText = '$0.00';
+        return;
+      }
+
+      let subtotal = 0;
+      container.innerHTML = cart.map(item => {
+        const itemTotal = item.product.price * item.quantity;
+        subtotal += itemTotal;
+        return `
+          <div class="py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+              <img src="${item.product.image}" class="w-10 h-10 object-cover rounded-lg" />
+              <div>
+                <h4 class="font-semibold text-xs text-slate-800 line-clamp-1 w-28">${item.product.title}</h4>
+                <span class="font-extrabold text-xs text-rose-600">$${item.product.price.toFixed(2)}</span>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="changeCartQty('${item.product.id}', -1)" class="w-5 h-5 bg-slate-100 rounded text-xs font-bold">-</button>
+              <span class="text-xs font-bold text-slate-800">${item.quantity}</span>
+              <button onclick="changeCartQty('${item.product.id}', 1)" class="w-5 h-5 bg-slate-100 rounded text-xs font-bold">+</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      subtotalEl.innerText = `$${subtotal.toFixed(2)}`;
+      totalEl.innerText = `$${subtotal.toFixed(2)}`;
+    }
+
+    function changeCartQty(prodId, delta) {
+      const item = cart.find(i => i.product.id === prodId);
+      if (item) {
+        item.quantity += delta;
+        if (item.quantity <= 0) {
+          cart = cart.filter(i => i.product.id !== prodId);
+        }
+      }
+      updateCartUI();
+    }
+
+    function toggleCartModal(show) {
+      const modal = document.getElementById('cart-modal');
+      if (show) modal.classList.remove('hidden');
+      else modal.classList.add('hidden');
+    }
+
+    function showAccountRequiredModal() {
+      document.getElementById('account-required-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeAccountRequiredModal() {
+      document.getElementById('account-required-modal').classList.add('hidden');
+      pendingCartProductId = null;
+    }
+
+    function continueToAccount() {
+      document.getElementById('account-required-modal').classList.add('hidden');
+      document.getElementById('product-modal').classList.add('hidden');
+      switchTab('profile');
+      document.getElementById('account-name').focus();
+    }
+
+    function checkoutCart() {
+      if (cart.length === 0) {
+        showToast('Your cart is empty.');
+        return;
+      }
+      if (!accountProfile) {
+        showAccountRequiredModal();
+        return;
+      }
+      toggleCartModal(false);
+      const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+      document.getElementById('checkout-total').textContent = `$${total.toFixed(2)}`;
+      document.getElementById('checkout-modal').classList.remove('hidden');
+      selectPaymentMethod('qr');
+      lucide.createIcons();
+    }
+
+    function closeCheckoutModal() {
+      document.getElementById('checkout-modal').classList.add('hidden');
+    }
+
+    function selectPaymentMethod(method) {
+      selectedPaymentMethod = method;
+      const qrSelected = method === 'qr';
+      const qrButton = document.getElementById('payment-method-qr');
+      const deliveryButton = document.getElementById('payment-method-delivery');
+      qrButton.setAttribute('aria-pressed', String(qrSelected));
+      deliveryButton.setAttribute('aria-pressed', String(!qrSelected));
+      qrButton.className = qrSelected
+        ? 'border border-rose-300 bg-rose-50 rounded-xl p-3 text-left'
+        : 'border border-slate-200 bg-white rounded-xl p-3 text-left';
+      deliveryButton.className = qrSelected
+        ? 'border border-slate-200 bg-white rounded-xl p-3 text-left'
+        : 'border border-rose-300 bg-rose-50 rounded-xl p-3 text-left';
+      document.getElementById('qr-payment-panel').classList.toggle('hidden', !qrSelected);
+      document.getElementById('delivery-payment-panel').classList.toggle('hidden', qrSelected);
+
+      const confirmButton = document.getElementById('confirm-checkout-button');
+      confirmButton.disabled = qrSelected && !paymentQrAvailable;
+      confirmButton.textContent = qrSelected
+        ? (paymentQrAvailable ? 'I have paid — place order' : 'Add payment QR to enable')
+        : 'Place order — pay on delivery';
+    }
+
+    function handlePaymentQrLoad(isAvailable) {
+      paymentQrAvailable = isAvailable;
+      document.getElementById('payment-qr-image').classList.toggle('hidden', !isAvailable);
+      document.getElementById('payment-qr-unavailable').classList.toggle('hidden', isAvailable);
+      document.getElementById('payment-qr-instructions').classList.toggle('hidden', !isAvailable);
+      if (selectedPaymentMethod === 'qr') selectPaymentMethod('qr');
+    }
+
+    function confirmCheckout() {
+      if (cart.length === 0) {
+        closeCheckoutModal();
+        showToast('Your cart is empty.');
+        return;
+      }
+      if (selectedPaymentMethod === 'qr' && !paymentQrAvailable) {
+        showToast('Add a valid payment QR image before choosing QR payment.');
+        return;
+      }
+
+      const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+      cart = [];
+      updateCartUI();
+      closeCheckoutModal();
+      if (selectedPaymentMethod === 'delivery') {
+        showToast(`Order placed. Pay $${total.toFixed(2)} when it arrives.`);
+      } else {
+        showToast('Order submitted. Payment needs manual verification.');
+      }
+    }
+
+    function openProductModal(prodId) {
+      const p = PRODUCTS.find(item => item.id === prodId);
+      const modal = document.getElementById('product-modal');
+      const content = document.getElementById('product-modal-content');
+
+      content.innerHTML = `
+        <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+          <span class="text-xs font-bold text-rose-600 uppercase">Keychain Details</span>
+          <button onclick="document.getElementById('product-modal').classList.add('hidden')" class="p-1 text-slate-400">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <img src="${p.image}" class="w-full h-52 object-cover rounded-2xl" />
+        <div>
+          <span class="text-xs text-slate-400 font-semibold">${p.material} • ${p.theme}</span>
+          <h3 class="font-bold text-base text-slate-900 mt-1">${p.title}</h3>
+          <p class="text-lg font-black text-rose-600 mt-1">$${p.price.toFixed(2)}</p>
+          <p class="text-xs text-slate-600 mt-2">${p.description}</p>
+        </div>
+        <button onclick="addToCart('${p.id}'); document.getElementById('product-modal').classList.add('hidden');" class="w-full bg-rose-500 text-white font-bold text-xs py-3 rounded-xl">
+          Add to Cart ($${p.price.toFixed(2)})
+        </button>
+      `;
+
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    // --- INTERACTION TOGGLES ---
+    function toggleProductLike(id, e) {
+      e.stopPropagation();
+      if (likedProducts.includes(id)) {
+        likedProducts = likedProducts.filter(item => item !== id);
+        showToast("Removed from Saved");
+      } else {
+        likedProducts.push(id);
+        showToast("Saved Keychain! 🔑");
+      }
+      saveAppState();
+      renderProductsGrid();
+    }
+
+    function toggleFollowSeller(sellerId) {
+      if (followedSellers.includes(sellerId)) {
+        followedSellers = followedSellers.filter(id => id !== sellerId);
+        showToast("Unfollowed Store");
+      } else {
+        followedSellers.push(sellerId);
+        showToast("Following Store! ✨");
+      }
+      saveAppState();
+      renderStoreView();
+    }
+
+    function toggleLikeSeller(sellerId) {
+      if (likedSellers.includes(sellerId)) {
+        likedSellers = likedSellers.filter(id => id !== sellerId);
+        sellerLikesCount[sellerId]--;
+      } else {
+        likedSellers.push(sellerId);
+        sellerLikesCount[sellerId]++;
+        showToast("Liked Store Page! ❤️");
+      }
+      saveAppState();
+      renderStoreView();
+    }
+
+    async function triggerPWAInstall() {
+      if (deferredPwaPrompt) {
+        try {
+          await deferredPwaPrompt.prompt();
+          const choice = await deferredPwaPrompt.userChoice;
+          if (choice.outcome === 'accepted') {
+            showToast("App Installed to Device!");
+          }
+          deferredPwaPrompt = null;
+        } catch (error) {
+          console.error('App installation prompt failed.', error);
+          showToast('The app could not be installed. Try your browser menu.');
+        }
+      } else if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
+        showToast('KeychainStype is already installed.');
+      } else {
+        showToast('To install, use your browser menu and choose Install app or Add to Home Screen.');
+      }
+    }
+  </script>
+</body>
+</html>
