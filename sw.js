@@ -1,8 +1,9 @@
-const CACHE_VERSION = 'keychainland-v2';
+const CACHE_VERSION = 'keychainland-v3';
 const APP_CACHE = `${CACHE_VERSION}-app`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const APP_SHELL = [
   './keychainland_vanilla_pwa.html',
+  './styles.css',
   './manifest.webmanifest',
   './assets/app-icon.svg',
   './assets/keychains/anime-character-keychains.png',
