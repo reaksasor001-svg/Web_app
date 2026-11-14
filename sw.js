@@ -1,28 +1,24 @@
-const CACHE_VERSION = 'keychainland-v3';
+const CACHE_VERSION = 'keychainstype-v4';
 const APP_CACHE = `${CACHE_VERSION}-app`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const APP_SHELL = [
-  './keychainland_vanilla_pwa.html',
+  './',
+  './index.html',
   './styles.css',
   './manifest.webmanifest',
+  './sw.js',
   './assets/app-icon.svg',
-  './assets/keychains/anime-character-keychains.png',
+  './assets/app-icon-192.png',
+  './assets/app-icon-512.png',
   './assets/keychains/anime-bead-figure.png',
-  './assets/keychains/anime-id-figure.png',
-  './assets/keychains/anime-id-keychain.png',
-  './assets/keychains/anime-panel-charms.png',
-  './assets/keychains/anime-panel-keychains.png',
   './assets/keychains/anime-photo-shaker.png',
+  './assets/keychains/anime-panel-charms.png',
   './assets/keychains/anime-pink-teal-charms.png',
-  './assets/keychains/bear-figure-keychain.png',
-  './assets/keychains/cat-charm.png',
-  './assets/keychains/dragon-keychains.png',
-  './assets/keychains/guitar-keychains.png',
+  './assets/keychains/anime-id-figure.png',
   './assets/keychains/silver-heart-charm.png',
   './assets/keychains/strawberry-headphone-beads.png',
-  './assets/keychains/travel-charms.png',
-  './assets/keychains/violin-keychain.png',
-  './assets/keychains/guitar-pair-charms.png'
+  './assets/keychains/guitar-pair-charms.png',
+  './assets/keychains/travel-charms.png'
 ];
 
 self.addEventListener('install', event => {
@@ -38,7 +34,7 @@ self.addEventListener('activate', event => {
     caches.keys()
       .then(keys => Promise.all(
         keys
-          .filter(key => key.startsWith('keychainland-') && key !== APP_CACHE && key !== RUNTIME_CACHE)
+          .filter(key => key.startsWith('keychainstype-') && key !== APP_CACHE && key !== RUNTIME_CACHE)
           .map(key => caches.delete(key))
       ))
       .then(() => self.clients.claim())
@@ -71,10 +67,10 @@ self.addEventListener('fetch', event => {
       fetch(request)
         .then(response => {
           const copy = response.clone();
-          caches.open(APP_CACHE).then(cache => cache.put('./keychainland_vanilla_pwa.html', copy));
+          caches.open(APP_CACHE).then(cache => cache.put('./index.html', copy));
           return response;
         })
-        .catch(async () => (await caches.match(request)) || caches.match('./keychainland_vanilla_pwa.html'))
+        .catch(async () => (await caches.match(request)) || caches.match('./index.html') || caches.match('./'))
     );
     return;
   }

@@ -9,8 +9,10 @@
   
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./assets/app-icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./assets/app-icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="KeychainStype">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f4395e">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -218,6 +220,39 @@
             <i data-lucide="download" class="w-4 h-4"></i>
             <span>Install KeychainStype App</span>
           </button>
+        </div>
+
+        <!-- Contact & Sitemap -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="mail" class="w-5 h-5 text-rose-500"></i>
+              <h4 class="font-bold text-sm text-slate-900">Contact &amp; Sitemap</h4>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Support</span>
+          </div>
+
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Email</p>
+              <a href="mailto:hello@keychainstype.com" class="mt-1 block text-sm font-semibold text-slate-800 hover:text-rose-600">hello@keychainstype.com</a>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Instagram</p>
+              <a href="https://instagram.com/keychainstype" target="_blank" rel="noreferrer" class="mt-1 block text-sm font-semibold text-slate-800 hover:text-rose-600">@keychainstype</a>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Site map</p>
+            <div class="grid grid-cols-2 gap-2 text-xs text-slate-600">
+              <button onclick="switchTab('explore')" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-left font-medium hover:border-rose-200 hover:bg-rose-50 transition">Home</button>
+              <button onclick="switchTab('store')" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-left font-medium hover:border-rose-200 hover:bg-rose-50 transition">Makers</button>
+              <button onclick="switchTab('chats')" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-left font-medium hover:border-rose-200 hover:bg-rose-50 transition">Chats</button>
+              <button onclick="switchTab('saved')" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-left font-medium hover:border-rose-200 hover:bg-rose-50 transition">Saved</button>
+              <button onclick="switchTab('profile')" class="col-span-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left font-medium hover:border-rose-200 hover:bg-rose-50 transition">Profile &amp; settings</button>
+            </div>
+          </div>
         </div>
       </section>
     </main>
@@ -783,7 +818,7 @@
       });
 
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').catch(error => {
+        navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
           console.error('Service worker registration failed.', error);
           showToast('Offline app features could not be enabled.');
         });
